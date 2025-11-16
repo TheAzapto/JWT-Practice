@@ -1,0 +1,71 @@
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>Capstone API Demo</title></head>
+<body>
+<h1>Employee API Demo</h1>
+
+<section>
+  <h2>Basic Auth - Create user</h2>
+  <form id="register-basic">
+    <input name="username" placeholder="username" required>
+    <input name="password" placeholder="password" type="password" required>
+    <button>Create user</button>
+  </form>
+  <button id="basic-get">GET /api/basic/employees</button>
+</section>
+
+<section>
+  <h2>JWT - Login</h2>
+  <form id="login-jwt">
+    <input name="username" placeholder="username" required>
+    <input name="password" name="password" type="password" placeholder="password" required>
+    <button>Login</button>
+  </form>
+  <button id="jwt-get">GET /api/jwt/employees</button>
+</section>
+
+<script>
+document.getElementById('register-basic').onsubmit = async (e) => {
+  e.preventDefault();
+  const form = e.target;
+  const res = await fetch('/api/basic/register', {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({username: form.username.value, password: form.password.value})
+  });
+  alert(await res.text());
+};
+
+document.getElementById('basic-get').onclick = async () => {
+  // Basic auth header (example) - change username/password
+  const username = prompt('basic username');
+  const password = prompt('basic password');
+  const h = 'Basic ' + btoa(username + ':' + password);
+  const res = await fetch('/api/basic/employees', {headers:{'Authorization': h}});
+  const data = await res.json();
+  alert(JSON.stringify(data));
+};
+
+// JWT login and get
+document.getElementById('login-jwt').onsubmit = async (e) => {
+  e.preventDefault();
+  const form = e.target;
+  const res = await fetch('/api/jwt/login', {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({username: form.username.value, password: form.password.value})
+  });
+  const data = await res.json();
+  localStorage.setItem('jwt', data.token);
+  alert('Token saved to localStorage');
+};
+
+document.getElementById('jwt-get').onclick = async () => {
+  const token = localStorage.getItem('jwt');
+  const res = await fetch('/api/jwt/employees', {headers:{'Authorization': 'Bearer ' + token}});
+  const data = await res.json();
+  alert(JSON.stringify(data));
+};
+</script>
+</body>
+</html>
